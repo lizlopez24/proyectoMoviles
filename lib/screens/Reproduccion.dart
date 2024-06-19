@@ -1,35 +1,92 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 
 void main(){
-  runApp(ReproducionApp());
+  runApp(ReproducionApp(data: '', nombre: '',));
 }
-class ReproducionApp extends StatelessWidget {
-  const ReproducionApp({super.key});
+class ReproducionApp extends StatefulWidget {
 
+  final String data;
+  final String nombre;
+  ReproducionApp({required this.data, required this.nombre});
+  
+ @override
+  _ReproducionAppState createState() => _ReproducionAppState();
+}
+
+class _ReproducionAppState extends State<ReproducionApp> {
+  late VideoPlayerController _controller;
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Home(),
-    );
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.data))
+      ..initialize().then((_) {
+        setState(() {});
+        _controller.play();
+      });
   }
-}
-class Home extends StatefulWidget {
-  const Home({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
-}
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
 
-class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: VideoPlayerScreen()
+      appBar: AppBar(title: Text(widget.nombre)),
+      body: Container(
+        decoration: BoxDecoration(
+        color: Color.fromARGB(255, 14, 16, 65),
+      ),
+        child: Center(
+          child: _controller.value.isInitialized
+              ? AspectRatio(
+                  aspectRatio: _controller.value.aspectRatio,
+                  child: VideoPlayer(_controller),
+                )
+              : CircularProgressIndicator(),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            _controller.value.isPlaying
+                ? _controller.pause()
+                : _controller.play();
+          });
+        },
+        child: Icon(
+          _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+        ),
+      ),
     );
   }
 }
+/*
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Cuerpo(data)
+    );
+  }
+}
+
+Widget Cuerpo(data){
+  final httpsReference = FirebaseStorage.instance.refFromURL(data);
+  final video=httpsReference.getDownloadURL();
+
+  return Column(
+    children: [
+      Text("Dato: $data")
+    ],
+  );
+}
+
+  
 
 
 class VideoPlayerScreen extends StatefulWidget {
@@ -81,3 +138,4 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     );
   }
 }
+*/

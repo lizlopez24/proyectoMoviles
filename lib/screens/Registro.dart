@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:proyecto_final/screens/Login.dart';
 
@@ -35,17 +36,22 @@ class _HomeState extends State<Home> {
         appBar: AppBar(
           title: const Text("Registro de Usuario"),
         ),
-        body: Cuerpo(context));
+        body: SingleChildScrollView(child: Cuerpo(context)));
   }
 }
 
 Widget Cuerpo(context) {
   return Container(
+    height: MediaQuery.of(context).size.height,
     decoration: BoxDecoration(
         color: Color.fromARGB(255, 14, 16, 65),
       ),
     child: (Column(
       children: <Widget>[
+        Container(
+            padding: EdgeInsets.only(top: 30),
+            child: Image.network('https://cdn-icons-png.freepik.com/512/10892/10892514.png', scale: 3,),
+          ),
         Container(
           padding: EdgeInsets.only(top:30),
           child: Text("Datos Personales", style: TextStyle(fontSize: 24, color: Colors.white)),
@@ -109,6 +115,7 @@ Widget Password() {
 Widget BotonRegistrar(context) {
   return (FilledButton(
       onPressed: () {
+        guardarUsuario();
         registro(context);
       },
       child: Text("Registrar")));
@@ -120,20 +127,7 @@ Future<void> registro(context) async {
         .createUserWithEmailAndPassword(
       email: _correo.text,
       password: _contrasenia.text,
-    ).then((user) async {
-      await user.user?.updateDisplayName(_nombre.text);
-    /*
-      String uid=user.user?.uid.toString() ?? generarCadenaAleatoria(10) ;
-
-      DatabaseReference ref =
-      FirebaseDatabase.instance.ref("users/"+uid);
-      await ref.set({
-        "nombre": _nombre.text,
-        "edad": _edad.text,
-      });
-      */
-    });
-
+    );
     Navigator.push(context, MaterialPageRoute(builder: (context) => LoginApp()));
   } on FirebaseAuthException catch (e) {
     if (e.code == 'weak-password') {
@@ -144,4 +138,10 @@ Future<void> registro(context) async {
   } catch (e) {
     print(e);
   }
+}
+Future<void> guardarUsuario() async {
+  DatabaseReference ref = FirebaseDatabase.instance.ref("users/"+_nombre.text);
+await ref.set({
+  "correo": _correo.text
+});
 }

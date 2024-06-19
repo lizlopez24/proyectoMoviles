@@ -30,17 +30,22 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: const Text("Iniciar Sesión"),
       ),
-      body: Cuerpo(context),
+      body: SingleChildScrollView(child: Cuerpo(context)),
     );
   }
 }
 Widget Cuerpo(context){
   return Container(
+    height: MediaQuery.of(context).size.height,
+    decoration: BoxDecoration(
+        color: Color.fromARGB(255, 14, 16, 65),
+      ),
     child: (
       Column(
         children: <Widget>[
           Container(
-            child: Image.network('https://cdn-icons-png.flaticon.com/512/6326/6326055.png', scale: 3,),
+            padding: EdgeInsets.only(top: 30),
+            child: Image.network('https://cdn-icons-png.freepik.com/512/10892/10892514.png', scale: 3,),
           ),
           Correo(),
           Password(),
@@ -59,7 +64,7 @@ Widget Correo(){
       controller: _correo,
       decoration: InputDecoration(
         hintText: "Ingrese su correo electrónico",
-        fillColor: Color.fromARGB(255, 197, 219, 235),
+        fillColor: Colors.white,
         filled: true
       ),
       keyboardType: TextInputType.emailAddress,
@@ -78,7 +83,7 @@ Widget Password(){
         obscureText: true,
         decoration: InputDecoration(
           hintText: 'Ingrese su contraseña',
-          fillColor: Color.fromARGB(255, 197, 219, 235),
+          fillColor: Colors.white,
           filled: true,
         ),
         keyboardType: TextInputType.visiblePassword,
@@ -92,6 +97,7 @@ Widget BotonLogin(context){
   return(
     FilledButton(onPressed: (){
       login(context);
+      //Navigator.push(context, MaterialPageRoute(builder: (context)=>Formulario()));
     }, child: Text("Iniciar Sesión"))
   );
 }
@@ -104,11 +110,23 @@ Future<void> login(context) async {
   );
   Navigator.push(context, MaterialPageRoute(builder: (context)=>Formulario()));
 } on FirebaseAuthException catch (e) {
-  if (e.code == 'user-not-found') {
-    print('No user found for that email.');
+  if (e.code == 'invalid-credential') {
+    mostrarAlertaMail(context);
   } else if (e.code == 'wrong-password') {
-    print('Wrong password provided for that user.');
   }
 }
+}
 
+void mostrarAlertaMail(context){
+  showDialog(context: context, builder: (context){
+    return AlertDialog(
+      title: Text("Error al iniciar sesión"),
+      content: Text("El correo o contraseña son incorrectos"),
+      actions: [
+        TextButton(onPressed: (){
+          Navigator.pop(context);
+        }, child: Text("Aceptar"))
+      ],
+    );
+  });
 }
